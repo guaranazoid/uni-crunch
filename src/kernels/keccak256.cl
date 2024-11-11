@@ -340,7 +340,7 @@ __kernel void hashMessage(
   if (
     isUniPattern(digest)
   ) {
-    // To be honest, if we are using OpenCL, 
+    // To be honest, if we are using OpenCL,
     // we just need to write one solution for all practical purposes,
     // since the chance of multiple solutions appearing
     // in a single workset is extremely low.

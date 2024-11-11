@@ -8,11 +8,14 @@ use fs4::FileExt;
 use ocl::{Buffer, Context, Device, MemFlags, Platform, ProQue, Program, Queue};
 use rand::{thread_rng, Rng};
 use rayon::prelude::*;
+use reqwest::blocking::Client;
 use separator::Separatable;
+use serde::Serialize;
 use std::error::Error;
 use std::fmt::Write as _;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
+use std::thread;
 use std::time::{SystemTime, UNIX_EPOCH};
 use terminal_size::{terminal_size, Height};
 use tiny_keccak::{Hasher, Keccak};
@@ -45,6 +48,7 @@ pub struct Config {
     pub gpu_device: u8,
     pub leading_zeroes_threshold: u8,
     pub total_zeroes_threshold: u8,
+    pub post_url: Option<String>,
 }
 
 /// Validate the provided arguments and construct the Config struct.
@@ -63,6 +67,10 @@ impl Config {
             return Err("didn't get an init_code_hash argument");
         };
 
+        let post_url = match args.next() {
+            Some(arg) => Some(arg),
+            None => None,
+        };
         let gpu_device_string = match args.next() {
             Some(arg) => arg,
             None => String::from("255"), // indicates that CPU will be used.
@@ -123,6 +131,7 @@ impl Config {
             gpu_device,
             leading_zeroes_threshold,
             total_zeroes_threshold,
+            post_url,
         })
     }
 }
@@ -538,9 +547,39 @@ pub fn gpu(config: Config) -> ocl::Result<()> {
             writeln!(&file, "{output}").expect("Couldn't write to `efficient_addresses.txt` file.");
 
             file.unlock().expect("Couldn't unlock file.");
+
+            // If the post_url is set, send a POST request to it in a separate thread
+            if let Some(url) = config.post_url.clone() {
+                let salt = format!(
+                    "0x{}{}{}",
+                    hex::encode(config.calling_address),
+                    hex::encode(salt),
+                    hex::encode(solution)
+                );
+                let data = PostData {
+                    salt,
+                    address: address.to_string(),
+                };
+                thread::spawn(move || {
+                    let client = Client::new();
+                    match client.post(url).json(&data).send() {
+                        Ok(response) => {
+                            println!("Successfully POSTed {}: {:?}", &data.address, response)
+                        }
+                        Err(e) => eprintln!("Failed to POST result address. Error: {:?}", e),
+                    }
+                });
+            }
+
             found += 1;
         }
     }
+}
+
+#[derive(Serialize)]
+struct PostData {
+    salt: String,
+    address: String,
 }
 
 #[track_caller]
