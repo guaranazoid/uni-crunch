@@ -192,6 +192,10 @@ static inline void keccakf(ulong *a)
 static inline bool isUniPattern(uchar const *d) {
     #define d_words ((uint*) d)
 
+    if (d_words[0] == 0xff000000u && (!d[4])) {
+        return true;
+    }
+
     if (d_words[0]) {
         return false;
     }
