@@ -192,6 +192,9 @@ static inline void keccakf(ulong *a)
 static inline bool isUniPattern(uchar const *d) {
     #define d_words ((uint*) d)
 
+    if ((d_words[1] & 0x00f0ffffu) == 0x00404404u) {
+        return true;
+    }
     if (d_words[0]) {
         return false;
     }
@@ -340,7 +343,7 @@ __kernel void hashMessage(
   if (
     isUniPattern(digest)
   ) {
-    // To be honest, if we are using OpenCL, 
+    // To be honest, if we are using OpenCL,
     // we just need to write one solution for all practical purposes,
     // since the chance of multiple solutions appearing
     // in a single workset is extremely low.
