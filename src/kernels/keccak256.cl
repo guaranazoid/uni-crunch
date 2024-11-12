@@ -195,6 +195,9 @@ static inline bool isUniPattern(uchar const *d) {
     if (d_words[0]) {
         return false;
     }
+    if ((d_words[1] & 0x0000ffffu) == 0x00004444u) {
+        return true;
+    }
     if ((d_words[1] & 0x00f0ffffu) == 0x00404404u) {
         return true;
     }
