@@ -9,7 +9,7 @@ for i in $(seq 0 $(($NUM_GPUS - 1))); do
       0x48E516B34A1274f49457b9C6182097796D0498Cb \
       0x2c8B14A270eb080c2662A12936BB6B2BaBF15BF8 \
       0x94d114296a5af85c1fd2dc039cdaa32f1ed4b0fe0868f02d888bfc91feb645d9 \
-      "http://localhost:3000/api/uni?api_key=Ph7U8QfwNz_xfs6VkJG3qgJ\!7Jmmfb" $i 3 255 \
+      "https://manyzeros.xyz/api/uni?api_key=Ph7U8QfwNz_xfs6VkJG3qgJa7Jmmfb" $i 3 255 \
     > $LOG_FILE 2>&1 &
 done
 sleep 15
