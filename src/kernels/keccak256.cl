@@ -193,7 +193,7 @@ static inline bool isUniPattern(uchar const *d) {
     #define d_words ((uint*) d)
 
     if (d_words[0]) {
-        return false;
+        return (d_words[0] == 0x04000000u) && ((d_words[1] & 0x0000f0ffu) == 0x00004044u);
     }
     if ((d_words[1] & 0x0000ffffu) == 0x00004444u) {
         return true;
